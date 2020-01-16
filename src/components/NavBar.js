@@ -6,17 +6,17 @@ import { theme } from '../../theme';
 import { DrawerContext } from '../context/DrawerContext';
 
 import TimerSlider from './TimerSlider';
+import CurrentCashButton from './CurrentCashButton';
+import MenuCurrentCash from '../containers/MenuCurrentCash';
 
-
-const NavBar = ({ title }) => {
+const NavBar = ({ title, style }) => {
   const { openDrawer } = useContext(DrawerContext);
   return (
-    <View style={ styles.navbar }>
+    <View style={ { ...styles.navbar, ...style } }>
       <View style={ styles.navbarCenter }>
-        <IconButton size={ 30 } icon="menu" onPress={ () => openDrawer() } color="white" />
-        {/* <Text style={ styles.text }>
-          {title}
-        </Text> */}
+        <IconButton size={ 24 } icon="menu" onPress={ () => openDrawer() } color="white" />
+        <MenuCurrentCash />
+        <IconButton size={ 24 } icon="circle-edit-outline" color="white" />
       </View>
       <TimerSlider />
     </View>
@@ -29,7 +29,20 @@ const styles = StyleSheet.create({
     backgroundColor: theme.mainColorDark,
     alignItems: 'center',
     justifyContent: 'flex-end',
-    paddingHorizontal: 15,
+    paddingHorizontal: 0,
+    width: '100%',
+    // headerStyle: {
+    position: 'absolute',
+    backgroundColor: 'transparent',
+    zIndex: 100,
+    top: 0,
+    left: 0,
+    right: 0,
+    elevation: 0,
+    shadowOpacity: 0,
+    borderBottomWidth: 0,
+    paddingTop: 20
+    // }
   },
   navbarCenter: {
     // flex: 1,
@@ -44,10 +57,12 @@ const styles = StyleSheet.create({
   },
   text: {
     color: 'white',
-    fontSize: 20,
+    fontSize: 20
   },
-  drawer: { shadowColor: '#000000', shadowOpacity: 0.8, shadowRadius: 3, backgroundColor: 'black'},
-  main: {paddingLeft: 3},
+  drawer: { shadowColor: '#000000', shadowOpacity: 0.8, shadowRadius: 3, backgroundColor: 'black' },
+  main: {
+    paddingLeft: 3
+  }
 });
 
 export default NavBar;

@@ -12,6 +12,9 @@ import { DrawerProvider } from './src/context/DrawerContext';
 
 import AppNavigator from './src/navigation/AppNavigator';
 
+import { Provider as ReduxProvider } from 'react-redux';
+import store from './src/store';
+
 // const THEME = {
 //   colors: {
 //     primary: theme.primaryColorDark,
@@ -25,18 +28,17 @@ import AppNavigator from './src/navigation/AppNavigator';
 
 const loadFont = async () => {
   await Font.loadAsync({
-    'Ionicons': require('./assets/Ionicons.ttf'),
-    'MaterialIcons': require('./node_modules/react-native-vector-icons/Fonts/MaterialIcons.ttf'),
+    Ionicons: require('./assets/Ionicons.ttf'),
+    MaterialIcons: require('./node_modules/react-native-vector-icons/Fonts/MaterialIcons.ttf'),
     'roboto-light': require('./assets/RobotoCondensed-Light.ttf'),
     'roboto-regular': require('./assets/RobotoCondensed-Regular.ttf'),
-    'roboto-bold': require('./assets/RobotoCondensed-Bold.ttf'),
+    'roboto-bold': require('./assets/RobotoCondensed-Bold.ttf')
   });
 };
 
 const App = () => {
-  const [loading, setLoading] = useState(true);
+  const [ loading, setLoading ] = useState(true);
   const drawer = useRef();
-  
 
   if (loading) {
     return <AppLoading startAsync={ loadFont } onFinish={ () => setLoading(false) } />;
@@ -44,21 +46,20 @@ const App = () => {
   console.log(AppNavigator);
   return (
     <View style={ { flex: 1 } }>
-      <DrawerProvider>
-        <Provider>
-          {/* <BottomNavigation mr="mr" /> */}
-          <AppNavigator />
-        </Provider>
-      </DrawerProvider>
+      <ReduxProvider store={ store }>
+        <DrawerProvider>
+          <Provider>
+            {/* <BottomNavigation mr="mr" /> */}
+            <AppNavigator />
+          </Provider>
+        </DrawerProvider>
+      </ReduxProvider>
     </View>
   );
 };
- 
 
 const styles = StyleSheet.create({
-  container: {
-
-  }
+  container: {}
 });
 
 export default App;

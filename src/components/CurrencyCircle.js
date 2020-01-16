@@ -1,12 +1,24 @@
 import React from 'react';
-import { View, Text, StyleSheet, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
 import { theme } from '../../theme';
+import { rightCashSymbol } from '../rightCashSymbol';
 
-const CurrencyCircle = (props) => {
+const CurrencyCircle = ({ toggleCategory, finance, financeCount, expensesCount }) => {
+  const title = finance ? 'Расходы' : 'Доходы';
+  // const financeCount = 111;
+  // const expensesCount = 222;
   return (
-    <View style={ styles.circle }>
-      <Text style={ styles.text }>10000</Text>
-    </View>
+    <TouchableOpacity onPress={ toggleCategory } style={ styles.circle }>
+      <View style={ styles.circle }>
+        <Text style={ styles.title }>{title}</Text>
+        <Text style={ { ...styles.finance, color: finance ? theme.dangerColor : theme.primaryColor } }>
+          {rightCashSymbol('USD', finance ? expensesCount : financeCount)}
+        </Text>
+        <Text style={ { ...styles.expenses, color: finance ? theme.primaryColor : theme.dangerColor } }>
+          {rightCashSymbol('USD', finance ? financeCount : expensesCount)}
+        </Text>
+      </View>
+    </TouchableOpacity>
   );
 };
 
@@ -16,7 +28,7 @@ const styles = StyleSheet.create({
     // height: Dimensions.get('window').width * 0.17,
     // backgroundColor: theme.orangeColor,
     // margin: 5,
-    // borderRadius: Dimensions.get('window').width * 0.17,        
+    // borderRadius: Dimensions.get('window').width * 0.17,
     // position: "absolute",
     // left: Dimensions.get('window').width * 0.24,
     // top: Dimensions.get('window').width * 0.08,
@@ -32,9 +44,24 @@ const styles = StyleSheet.create({
   },
   text: {
     color: theme.purpleColor,
-    fontSize: 25,
+    fontSize: 20,
     fontWeight: '100',
     fontFamily: 'roboto-light'
+  },
+  title: {
+    color: 'white',
+    fontSize: 22,
+    fontWeight: '100',
+    fontFamily: 'roboto-regular'
+  },
+  finance: {
+    fontSize: 20,
+    color: theme.primaryColor
+  },
+  expenses: {
+    fontSize: 16,
+    color: theme.dangerColor,
+    opacity: 0.7
   }
 });
 

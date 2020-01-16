@@ -1,6 +1,6 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import numeral from 'numeral';
-import { keys, map } from 'lodash';
+import { keys, map, isEmpty } from 'lodash';
 import getSymbolFromCurrency from 'currency-symbol-map';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { TextInput, Portal, Dialog, List, Switch, IconButton } from 'react-native-paper';
@@ -26,130 +26,168 @@ const currencyType = {
   BYN: 'Белорусский рубль'
 };
 
-const ModalTypeCash = ({ visibleChangeType, checkedTypeCash, setCheckedTypeCash, setVisibleChangeType }) => (
-  <Portal>
-    <Dialog
-      style={ { backgroundColor: theme.mainColorDark } }
-      visible={ visibleChangeType }
-      onDismiss={ () => setVisibleChangeType(false) }
-    >
-      <Dialog.Title style={ styles.dialogTitle }>Тип кошелька</Dialog.Title>
-      <Dialog.Content>
-        {/* {map(keys(currencyType), (key) => <AppRadioButton key={key} checked={ checkedTypeCash } value={key} text={currencyType[key]} onPress={ () => setCheckedTypeCash(key) } />)} */}
-        <AppRadioButton
-          checked={ checkedTypeCash }
-          value="money"
-          text="Счет"
-          onPress={ (value) => setCheckedTypeCash(value) }
-        />
-        <AppRadioButton
-          checked={ checkedTypeCash }
-          value="credit"
-          text="Накопления"
-          onPress={ (value) => setCheckedTypeCash(value) }
-        />
-      </Dialog.Content>
-      <Dialog.Actions>
-        <IconButton
-          icon="check"
-          size={ 30 }
-          color={ theme.primaryColorDark }
-          onPress={ () => setVisibleChangeType(false) }
-        />
-      </Dialog.Actions>
-    </Dialog>
-  </Portal>
-);
+const ModalTypeCash = ({ visibleChangeType, checkedTypeCash, setCheckedTypeCash, setVisibleChangeType }) => {
+  const checkAndDismiss = (value) => {
+    setCheckedTypeCash(value);
+    setVisibleChangeType(false);
+  };
+  return (
+    <Portal>
+      <Dialog
+        style={ { backgroundColor: theme.mainColorDark } }
+        visible={ visibleChangeType }
+        onDismiss={ () => setVisibleChangeType(false) }
+      >
+        <Dialog.Title style={ styles.dialogTitle }>Тип кошелька</Dialog.Title>
+        <Dialog.Content>
+          {/* {map(keys(currencyType), (key) => <AppRadioButton key={key} checked={ checkedTypeCash } value={key} text={currencyType[key]} onPress={ () => setCheckedTypeCash(key) } />)} */}
+          <AppRadioButton
+            checked={ checkedTypeCash }
+            value="money"
+            text="Счет"
+            onPress={ (value) => checkAndDismiss(value) }
+          />
+          <AppRadioButton
+            checked={ checkedTypeCash }
+            value="credit"
+            text="Накопления"
+            onPress={ (value) => checkAndDismiss(value) }
+          />
+        </Dialog.Content>
+      </Dialog>
+    </Portal>
+  );
+};
 
 const ModalTypeCurrency = ({
   visibleChangeCurrency,
   checkedTypeCurrency,
   setCheckedTypeCurrency,
   setVisibleChangeCurrency
-}) => (
-  <Portal>
-    <Dialog
-      style={ { backgroundColor: theme.mainColorDark } }
-      visible={ visibleChangeCurrency }
-      onDismiss={ () => setVisibleChangeCurrency(false) }
-    >
-      <Dialog.Title style={ styles.dialogTitle }>Тип кошелька</Dialog.Title>
-      <Dialog.Content>
-        {map(keys(currencyType), (key) => (
-          <AppRadioButton
-            key={ key }
-            checked={ checkedTypeCurrency }
-            value={ key }
-            text={ currencyType[key] }
-            onPress={ () => setCheckedTypeCurrency(key) }
-          />
-        ))}
-        {/* <AppRadioButton checked={ checkedTypeCurrency } value="money" text="Счет" onPress={ (value) => setCheckedTypeCurrency(value) } />
-        <AppRadioButton checked={ checkedTypeCurrency } value="credit" text="Накопления" onPress={ (value) => setCheckedTypeCurrency(value) } /> */}
-      </Dialog.Content>
-      <Dialog.Actions>
-        <IconButton
-          icon="check"
-          size={ 30 }
-          color={ theme.primaryColorDark }
-          onPress={ () => setVisibleChangeCurrency(false) }
-        />
-      </Dialog.Actions>
-    </Dialog>
-  </Portal>
-);
+}) => {
+  const [ checkItem, setCheckItem ] = useState(checkedTypeCurrency);
+  const successModal = () => {
+    setCheckedTypeCurrency(checkItem);
+    setVisibleChangeCurrency(false);
+  };
+  return (
+    <Portal>
+      <Dialog
+        style={ { backgroundColor: theme.mainColorDark } }
+        visible={ visibleChangeCurrency }
+        onDismiss={ () => setVisibleChangeCurrency(false) }
+        style={ { flex: 1, backgroundColor: theme.mainColorDark } }
+      >
+        <Dialog.Title style={ styles.dialogTitle }>Валюта счета</Dialog.Title>
+        <Dialog.Content style={ { flex: 3 } }>
+          <View style={ { flex: 1 } }>
+            <Dialog.ScrollArea>
+              <ScrollView>
+                {map(keys(currencyType), (key) => (
+                  <AppRadioButton
+                    key={ key }
+                    checked={ checkItem }
+                    value={ key }
+                    text={ currencyType[key] }
+                    onPress={ () => setCheckItem(key) }
+                  />
+                ))}
+              </ScrollView>
+            </Dialog.ScrollArea>
+          </View>
+          {/* <AppRadioButton checked={ checkedTypeCurrency } value="money" text="Счет" onPress={ (value) => setCheckedTypeCurrency(value) } />
+          <AppRadioButton checked={ checkedTypeCurrency } value="credit" text="Накопления" onPress={ (value) => setCheckedTypeCurrency(value) } /> */}
+        </Dialog.Content>
+        <Dialog.Actions style={ { borderTopWidth: 0.2, borderTopColor: '#999' } }>
+          <IconButton icon="check" size={ 30 } color={ theme.primaryColorDark } onPress={ successModal } />
+        </Dialog.Actions>
+      </Dialog>
+    </Portal>
+  );
+};
 
-const ModalDesription = ({ visibleDescription, toggleDescription, descriptionValue, setDescriptionValue }) => (
-  <Portal>
-    <Dialog
-      style={ { backgroundColor: theme.mainColorDark } }
-      visible={ visibleDescription }
-      onDismiss={ () => toggleDescription(false) }
-    >
-      <Dialog.Title style={ styles.dialogTitle }>Описание</Dialog.Title>
-      <Dialog.Content>
-        <TextInput
-          underlineColor={ theme.primaryColor }
-          theme={ {
-            colors: {
-              primary: theme.primaryColorDark,
-              text: 'white',
-              placeholder: theme.primaryColor
-            }
-          } }
-          value={ descriptionValue }
-          style={ { backgroundColor: theme.mainColorDark } }
-          onChangeText={ setDescriptionValue }
-        />
-      </Dialog.Content>
-      <Dialog.Actions>
-        <IconButton
-          icon="check"
-          size={ 30 }
-          color={ theme.primaryColorDark }
-          onPress={ () => toggleDescription(false) }
-        />
-      </Dialog.Actions>
-    </Dialog>
-  </Portal>
-);
+const ModalDesription = ({ visibleDescription, toggleDescription, descriptionValue, setDescriptionValue }) => {
+  const [ value, setValue ] = useState(descriptionValue);
+  const successModal = () => {
+    setDescriptionValue(value);
+    toggleDescription(false);
+  };
+  return (
+    <Portal>
+      <Dialog
+        style={ { backgroundColor: theme.mainColorDark } }
+        visible={ visibleDescription }
+        onDismiss={ () => toggleDescription(false) }
+      >
+        <Dialog.Title style={ styles.dialogTitle }>Описание</Dialog.Title>
+        <Dialog.Content>
+          <TextInput
+            underlineColor={ theme.primaryColor }
+            theme={ {
+              colors: {
+                primary: theme.primaryColorDark,
+                text: 'white',
+                placeholder: theme.primaryColor
+              }
+            } }
+            value={ value }
+            style={ { backgroundColor: theme.mainColorDark } }
+            onChangeText={ setValue }
+          />
+        </Dialog.Content>
+        <Dialog.Actions>
+          <IconButton icon="check" size={ 30 } color={ theme.primaryColorDark } onPress={ successModal } />
+        </Dialog.Actions>
+      </Dialog>
+    </Portal>
+  );
+};
 
 const { Section, Subheader, Item } = List;
 
-const CreateBankForm = () => {
+const CreateBankForm = (props) => {
+  const { navigation, wallet } = props;
+
   const [ visibleChangeType, setVisibleChangeType ] = useState(false);
   const [ visibleDescription, setVisibleDescription ] = useState(false);
   const [ visibleChangeCurrency, setVisibleChangeCurrency ] = useState(false);
 
+  const [ titleValue, setTitleValue ] = useState('');
   const [ descriptionValue, setDescriptionValue ] = useState('');
   const [ checkedTypeCash, setCheckedTypeCash ] = useState('money');
   const [ checkedTypeCurrency, setCheckedTypeCurrency ] = useState('USD');
 
-  const toggleChechedType = (e) => console.log(e);
+  useEffect(
+    () => {
+      if (!isEmpty(wallet)) {
+        const { title, description, typeCash, typeCurrency } = wallet;
+        setTitleValue(title);
+        setDescriptionValue(description);
+        setCheckedTypeCash(typeCash);
+        setCheckedTypeCurrency(typeCurrency);
+      }
+    },
+    [ wallet ]
+  );
 
-  const handleChange = (text) => {
-    console.log(text);
-  };
+  useEffect(
+    () => {
+      navigation.setParams({
+        wallet: {
+          id: wallet ? wallet.id : Math.random().toString(),
+          title: titleValue,
+          cash: Math.ceil(Math.random() * 100),
+          typeCurrency: checkedTypeCurrency,
+          typeCash: checkedTypeCash,
+          description: descriptionValue,
+          icon: 'money',
+          categories: [ {} ]
+        },
+        edit: !isEmpty(wallet)
+      });
+    },
+    [ titleValue, descriptionValue, checkedTypeCash, checkedTypeCurrency ]
+  );
 
   const bottomRef = useRef();
   const trans = new Value(0);
@@ -191,7 +229,8 @@ const CreateBankForm = () => {
         label="Название"
         style={ { ...styles.input, paddingHorizontal: 10 } }
         mode="outlined"
-        onChangeText={ handleChange }
+        onChangeText={ setTitleValue }
+        value={ titleValue }
         theme={ {
           colors: {
             primary: theme.primaryColorDark,
@@ -226,6 +265,7 @@ const CreateBankForm = () => {
               titleStyle={ { color: 'white' } }
               title="Описание"
               description={ descriptionValue || '...' }
+              descriptionNumberOfLines={ 1 }
               descriptionStyle={ styles.descriptionList }
             />
           </Section>
